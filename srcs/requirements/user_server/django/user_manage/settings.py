@@ -48,7 +48,7 @@ SECRET_KEY = 'django-insecure-lo0q8rwc4qvn*9t933jr+j2#0pn93h3i$km-)sx)5q5av9@l-^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1', 'userserver', 'userserver:8000', 'gameserver', 'gameserver:8001']
+ALLOWED_HOSTS = ['*']
 
 # LOGGING = {
 #     'version': 1,

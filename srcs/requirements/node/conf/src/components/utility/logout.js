@@ -1,7 +1,7 @@
 import { navigate } from "../../MyReact/MyReactRouter";
 
 function logout() {
-	fetch("http://localhost:8000/api/logout", {
+	fetch("/user/api/logout", {
 		method: 'POST',
 		credentials: 'include'
 	});

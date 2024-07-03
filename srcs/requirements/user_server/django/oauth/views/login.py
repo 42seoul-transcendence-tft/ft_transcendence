@@ -18,7 +18,7 @@ from django.core.mail import send_mail
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 HOST_IP = os.getenv("HOST_IP")
-RETURN_URI = f'http://{HOST_IP}:8000/api/login/done'
+RETURN_URI = f'https://{HOST_IP}:4242/user/api/login/done'
 
 
 class login_to_42(RedirectView):
@@ -31,7 +31,7 @@ def after_login(request):
 	user_instance = save_user_info(user)
 	make_otp_code(user_instance)
  
-	response = redirect('http://localhost:8080/emailotp')
+	response = redirect(f'https://{HOST_IP}:4242/emailotp')
 	response.set_cookie('pk', user_instance.pk, httponly=True)
 	return response
 

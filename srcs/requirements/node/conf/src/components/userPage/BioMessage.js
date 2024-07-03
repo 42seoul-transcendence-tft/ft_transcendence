@@ -72,7 +72,7 @@ function BioMessage({ userId, isMyPage }) {
 
 async function changeBioMessage(newBioMessage, myId) {
 	try {
-		const response = await fetch(`http://localhost:8000/api/users/${myId}/`, {
+		const response = await fetch(`/user/api/users/${myId}/`, {
 			method: 'PATCH',
 			credentials: 'include',
 			headers: {

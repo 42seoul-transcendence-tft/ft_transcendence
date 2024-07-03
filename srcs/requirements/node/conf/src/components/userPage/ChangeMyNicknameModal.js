@@ -39,7 +39,7 @@ function isNonAlphanumeric(newNickname) {
 
 async function changeNickname(myId, newNickname) {
 	try {
-		const response = await fetch(`http://localhost:8000/api/users/${myId}/`, {
+		const response = await fetch(`/user/api/users/${myId}/`, {
 			method: 'PATCH',
 			credentials: 'include',
 			headers: {

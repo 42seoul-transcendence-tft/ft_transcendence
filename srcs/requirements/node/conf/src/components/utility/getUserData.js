@@ -4,7 +4,7 @@ import tokenRefresh from "./tokenRefresh.js";
 
 async function getUserData(userId) {
 	try {
-		const response = await fetch(`http://localhost:8000/api/users/${userId}/`, {
+		const response = await fetch(`/user/api/users/${userId}/`, {
 			method: 'GET',
 			credentials: 'include'
 		});

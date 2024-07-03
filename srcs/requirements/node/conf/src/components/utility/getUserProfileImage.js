@@ -2,7 +2,7 @@ import tokenRefresh from "./tokenRefresh";
 
 async function getUserProfileImage(id) {
 	try {
-		const response = await fetch(`http://localhost:8000/api/users/${id}/avatar/`, { method: 'GET', credentials: 'include' });
+		const response = await fetch(`/user/api/users/${id}/avatar/`, { method: 'GET', credentials: 'include' });
 		if (response.status === 200) {
 			const blob = await response.blob();
 			return await URL.createObjectURL(blob);

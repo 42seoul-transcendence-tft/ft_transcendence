@@ -71,7 +71,7 @@ function HomeMatches({ myId }) {
 
 async function getOpenRooms() {
 	try {
-		const response = await fetch("http://localhost:8001/api/rooms/", {
+		const response = await fetch("/game/api/rooms/", {
 			method: 'GET',
 			credentials: 'include'
 		});
@@ -113,7 +113,7 @@ function RefreshRoomButton({ setRooms }) {
 
 async function createRoom(title, roomType) {
 	try {
-		const response = await fetch("http://localhost:8001/api/rooms/", {
+		const response = await fetch("/game/api/rooms/", {
 			method: 'POST',
 			credentials: 'include',
 			headers: {

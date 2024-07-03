@@ -1,6 +1,6 @@
 import { navigate } from "../../MyReact/MyReactRouter";
 
-const refreshApiUrl = "http://localhost:8000/api/token/refresh";
+const refreshApiUrl = "/user/api/token/refresh";
 
 function tokenRefreshAndGoTo(successGoTo) {
 	fetch(refreshApiUrl, {//refreshApi 요청

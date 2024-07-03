@@ -71,7 +71,7 @@ function HomeFriends() {
 
 async function unFriend(friendId) {
 	try {
-		const response = await fetch(`http://localhost:8000/api/me/friend/${friendId}`, {
+		const response = await fetch(`/user/api/me/friend/${friendId}`, {
 			method: 'DELETE',
 			credentials: 'include'
 		});
@@ -149,7 +149,7 @@ function FriendInfo({ friendId, setFriends, refresh }) {
 
 async function addNewFriend(newFriendName) {
 	try {
-		const response = await fetch("http://localhost:8000/api/me/friend", {
+		const response = await fetch("/user/api/me/friend", {
 			method: 'POST',
 			credentials: 'include',
 			headers: {

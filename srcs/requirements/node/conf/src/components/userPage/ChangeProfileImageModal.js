@@ -73,7 +73,7 @@ async function changeProfileImage(myId) {
 		if (!file) return "no file";
 		const formData = new FormData();
 		formData.append("avatar", file);
-		const response = await fetch(`http://localhost:8000/api/users/${myId}/`, {
+		const response = await fetch(`/user/api/users/${myId}/`, {
 			method: 'PATCH',
 			credentials: 'include',
 			body: formData

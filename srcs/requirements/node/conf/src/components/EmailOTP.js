@@ -6,7 +6,7 @@ async function onClickSubmit(event) {
 	const input = event.target.parentNode.querySelector("input");
 	const authStatusMessage = document.querySelector("#auth-status-message");
 	try {
-		const response = await fetch("http://localhost:8000/api/otp", {
+		const response = await fetch("/user/api/otp", {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
