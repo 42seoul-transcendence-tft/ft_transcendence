@@ -1,6 +1,6 @@
 import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
 
-function HomeMyInfo({ myData }) {
+function MyInfo({ myData }) {
 	const expWidth = `width:${(myData.exp % 1000) / 10}%`;
 	const winRateWidth = myData.wins + myData.losses === 0 ?
 		"width:0%" : `width:${(myData.wins / (myData.wins + myData.losses)) * 100}%`;
@@ -53,4 +53,4 @@ function HomeMyInfo({ myData }) {
 	);
 }
 
-export default HomeMyInfo;
+export default MyInfo;

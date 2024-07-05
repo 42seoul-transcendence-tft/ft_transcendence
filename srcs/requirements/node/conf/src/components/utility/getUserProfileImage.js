@@ -5,7 +5,7 @@ async function getUserProfileImage(id) {
 		const response = await fetch(`/user/api/users/${id}/avatar/`, { method: 'GET', credentials: 'include' });
 		if (response.status === 200) {
 			const blob = await response.blob();
-			return await URL.createObjectURL(blob);
+			return URL.createObjectURL(blob);
 		} else if (response.status === 401) {
 			return await tokenRefresh(() => getUserProfileImage(id));
 		} else {

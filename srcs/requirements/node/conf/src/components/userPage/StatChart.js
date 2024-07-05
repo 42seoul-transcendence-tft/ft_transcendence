@@ -1,8 +1,6 @@
 import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
 import ChangeProfileImageModal from "./ChangeProfileImageModal.js";
 
-
-
 function StatChart({ userData, myId, setRefresh }) {
 	const level = Math.floor(userData.exp / 1000);
 	const nextexp = Math.floor((userData.exp + 1000) / 1000) * 1000;

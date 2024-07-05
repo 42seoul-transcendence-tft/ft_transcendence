@@ -1,5 +1,5 @@
 import { useEffect, useState, MyReact } from "../MyReact/MyReact.js";
-import MyReactRouter, { Link } from "../MyReact/MyReactRouter.js";
+import { Link } from "../MyReact/MyReactRouter.js";
 import { navigate } from "../MyReact/MyReactRouter.js";
 import getMyData from "./utility/getMyData.js";
 import logout from "./utility/logout.js";

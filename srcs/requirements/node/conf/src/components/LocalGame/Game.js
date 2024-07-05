@@ -8,7 +8,7 @@ import LocalEventHandler from "./EventHandler.js";
 import BallSetter from "./BallSetter.js";
 import HitChecker from "./HitChecker.js";
 import { INIT } from "./constant.js";
-import { addScreenEffect, removeScreenEffect } from "../RemoteGame/Game.js";
+import { addScreenEffect, removeScreenEffect, getBallImage } from "../RemoteGame/Game.js";
 import "../../css/game/game-page.css";
 
 function LocalGame() {
@@ -42,7 +42,7 @@ function LocalGame() {
 
 function getInitialGameData() {
     return ({
-        ball: INIT.BALL,
+        ball: { ...INIT.BALL, image: getBallImage() },
         paddle: [ INIT.PADDLE1, INIT.PADDLE2 ],
         score: [ 0, 0 ],
         eventHandler: new LocalEventHandler(),
@@ -69,7 +69,7 @@ function setNextGame(setGame) {
 
         return ({
             ...prev,
-            ball: { ...INIT.BALL, direction: { x: ballDirectionX, y: 0 }},
+            ball: { ...prev.ball, ...INIT.BALL, direction: { x: ballDirectionX, y: 0 }},
             paddle: [ INIT.PADDLE1, INIT.PADDLE2 ],
             score: newScore,
         });

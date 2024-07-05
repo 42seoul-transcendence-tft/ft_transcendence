@@ -1,10 +1,8 @@
 import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
-import Navbar from "../Navbar.js";
 import { navigate } from "../../MyReact/MyReactRouter.js";
 import notifyStatusById from "../utility/notifyStatusById.js"
 import tokenRefresh from "../utility/tokenRefresh";
 import closeModalById from "../utility/closeModalById.js"
-import logout from "../utility/logout.js";
 
 async function deleteAccount() {
 	try {
@@ -13,13 +11,14 @@ async function deleteAccount() {
 			credentials: 'include'
 		});
 		if (response.status === 200) {
-			return "success";
+			return;
 		} else if (response.status === 401) {
 			return await tokenRefresh(deleteAccount);
 		} else {
 			return Promise.reject("unknown");
 		}
 	} catch (error) {
+		console.log("deleteAccount Error: ", error);
 		return Promise.reject(error);
 	}
 }

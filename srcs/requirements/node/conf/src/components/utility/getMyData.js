@@ -1,5 +1,3 @@
-import MyReact from "../../MyReact/MyReact.js";
-import logout from "./logout.js";
 import tokenRefresh from "./tokenRefresh.js";
 
 async function getMyData() {
@@ -16,6 +14,7 @@ async function getMyData() {
 			return Promise.reject("unknown");
 		}
 	} catch (error) {
+		console.log("getMyData Error: ", error);
 		return Promise.reject(error);
 	}
 }

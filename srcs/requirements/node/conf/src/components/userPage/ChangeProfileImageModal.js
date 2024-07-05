@@ -1,5 +1,4 @@
 import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
-import getMyData from "../utility/getMyData.js";
 import logout from "../utility/logout.js";
 import tokenRefresh from "../utility/tokenRefresh.js";
 import getUserProfileImage from "../utility/getUserProfileImage.js";
@@ -23,6 +22,7 @@ function ChangeProfileImageModal({ myId, setRefreshUpper }) {
 			setRefreshThis(current => !current);
 		}
 	}
+
 	useEffect(() => {
 		const a = async () => {
 			try {
@@ -81,7 +81,7 @@ async function changeProfileImage(myId) {
 		if (response.status === 200) {
 			return "success";
 		} else if (response.status === 401) {
-			return tokenRefresh(() => changeProfileImage(myId));
+			return await tokenRefresh(() => changeProfileImage(myId));
 		} else {
 			return Promise.reject("unknown");
 		}

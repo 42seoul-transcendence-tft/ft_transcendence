@@ -26,7 +26,7 @@ server {
         autoindex on;
     }
 
-    location /game/socket.io/ {
+    location /socket.io/ {
         proxy_pass http://gameserver:8001/socket.io/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -40,18 +40,20 @@ server {
         proxy_read_timeout 86400;
     }
 
-    location ~ ^/user/api/(.*) {
+    location ~ ^/user/api/(.*)$ {
         proxy_pass http://userserver:8000/api/$1?${args};
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Cookie $http_cookie;
     }
 
-    location ~ ^/game/api/(.*) {
+    location ~ ^/game/api/(.*)$ {
         proxy_pass http://gameserver:8001/api/$1?${args};
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Cookie $http_cookie;
     }
 
 }

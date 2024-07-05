@@ -1,6 +1,4 @@
 import { useEffect, useState, MyReact } from "../MyReact/MyReact.js";
-import MyReactRouter, { Link } from "../MyReact/MyReactRouter.js";
-import Navbar from "./Navbar.js";
 
 function clickLoginButton() {
 	window.location.href = "/user/api/login";

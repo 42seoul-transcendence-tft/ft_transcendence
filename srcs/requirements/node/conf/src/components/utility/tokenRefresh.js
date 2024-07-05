@@ -1,5 +1,3 @@
-import { navigate } from "../../MyReact/MyReactRouter";
-
 async function tokenRefresh(workingFunction) {
 	try {
 		const response = await fetch("/user/api/token/refresh", {
@@ -14,7 +12,8 @@ async function tokenRefresh(workingFunction) {
 			return Promise.reject("unknown");
 		}
 	} catch (error) {
-		return Promise.reject("network");
+		console.log("tokenRefresh Error: ", error);
+		return Promise.reject(error);
 	}
 }
 

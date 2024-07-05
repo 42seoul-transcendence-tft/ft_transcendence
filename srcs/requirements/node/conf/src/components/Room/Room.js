@@ -1,4 +1,5 @@
 import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
+import { navigate } from "../../MyReact/MyReactRouter.js";
 import TopLine from "./TopLine.js";
 import Title from "./Title.js";
 import Player from "./Player.js";
@@ -8,36 +9,43 @@ import { pongSocket, mttSocket } from "../RemoteGame/GameSocket.js";
 import { GAME } from "../RemoteGame/constant.js";
 import "../../css/room/room.css";
 
-function Room() {
-    const [ room, setRoom ] = useState(getInitialRoomData());
+function Room(props) {
+    try {
+        const [ room, setRoom ] = useState(getInitialRoomData(props));
 
-    useEffect(() => {
-        room.socket.sendRoomJoinMessage(room.myId, room.title);
-    	room.socket.turnOnRoomChannel(setRoom);
-    }, []);
-    return (
-        <div className="container-fluid" id="room-page">
-            <TopLine />
-            <Title room={ room } />
-            <Player room={ room } />
-            <BottomLine setFunction={ setRoom } />
-            <QuitPopUp data={ room } setFunction={ setRoom } /> 
-        </div>
-    );
+        useEffect(() => {
+            room.socket.sendRoomJoinMessage(room.myId, room.title);
+            room.socket.turnOnRoomChannel(setRoom);
+        }, []);
+        return (
+            <div className="container-fluid" id="room-page">
+                <TopLine />
+                <Title room={ room } />
+                <Player room={ room } />
+                <BottomLine setFunction={ setRoom } />
+                <QuitPopUp data={ room } setFunction={ setRoom } /> 
+            </div>
+        );
+    }
+    catch (error) {
+        alert(error);
+        navigate("/home");
+    }
 }
 
-function getInitialRoomData() {
-    const queryString = window.location.search;
-    const URLData = new URLSearchParams(queryString);
+function getInitialRoomData(props) {
+    if (!props.room)
+        throw new Error("Can't access the room");
+    const room = props.room;
 
     return ({ 
-        title: URLData.get('title'),
-        myId: Number(URLData.get('myId')),
-        type: URLData.get('type'),
-        socket: URLData.get('type') === GAME.TYPE.PONG ? pongSocket : mttSocket,
+        myId: props.myId,
+        title: room.name,
+        type: !room.mtt ? GAME.TYPE.PONG : GAME.TYPE.MTT,
+        socket: !room.mtt ? pongSocket : mttSocket,
+        players: !room.mtt ? [{}, {}] : [{}, {}, {}, {}],
         isQuitClicked: false,
-        players: URLData.get('type') === GAME.TYPE.PONG ? [{}, {}] : [{}, {}, {}, {}],
     });
 }
 
-export default Room
+export default Room;

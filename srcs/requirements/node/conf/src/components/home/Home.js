@@ -1,8 +1,8 @@
 import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
 import Navbar from "../Navbar.js";
-import HomeMyInfo from "./HomeMyInfo.js";
-import HomeFriends from "./HomeFriends.js";
-import HomeMatches from "./HomeMatches.js";
+import MyInfo from "./MyInfo.js";
+import FriendsInfo from "./FriendsInfo.js";
+import RoomsInfo from "./RoomsInfo.js";
 import getMyData from "../utility/getMyData.js";
 import logout from "../utility/logout.js";
 
@@ -39,11 +39,11 @@ function Home() {
 			<div className="container text-light">
 				<div className="row mt-3">
 					<div className="col-md-5">
-						<HomeMyInfo myData={myData} />
-						<HomeFriends />
+						<MyInfo myData={myData} />
+						<FriendsInfo />
 					</div>
 					<div className="col-md-7">
-						<HomeMatches myId={myData.id} />
+						<RoomsInfo myId={myData.id} />
 					</div>
 				</div>
 			</div>

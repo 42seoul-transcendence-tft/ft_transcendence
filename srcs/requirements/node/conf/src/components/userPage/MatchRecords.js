@@ -1,45 +1,8 @@
 import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
 import { navigate } from "../../MyReact/MyReactRouter.js";
-import logout from "../utility/logout.js";
-import tokenRefresh from "../utility/tokenRefresh.js";
 import getUserData from "../utility/getUserData.js"
-
-const sampleMatches = [
-	{
-		"id": 1,
-		"p1_score": 1,
-		"p2_score": 10,
-		"date": "2024-05-01T12:24:37.756097Z",
-		"p1": 1,
-		"p2": 2
-	},
-	{
-		"id": 2,
-		"p1_score": 10,
-		"p2_score": 7,
-		"date": "2024-05-01T12:24:53.702258Z",
-		"p1": 1,
-		"p2": 2
-	}
-]
-
-async function getUserMatchRecords(userId) {
-	try {
-		const response = await fetch(`/user/api/users/${userId}/matches`, {
-			method: 'GET',
-			credentials: 'include'
-		});
-		if (response.status === 200) {
-			return await response.json();
-		} else if (response.status === 401) {
-			return await tokenRefresh(() => getUserMatchRecords(userId));
-		} else {
-			return Promise.reject("unknown");
-		}
-	} catch (error) {
-		return Promise.reject(error);
-	}
-}
+import getUserMatchRecords from "../utility/getUserMatchRecords.js"
+import logout from "../utility/logout.js";
 
 function MatchRecords({ userId }) {
 	const [userMatchRecords, setUserMatchRecords] = useState([]);
@@ -80,23 +43,22 @@ function MatchRecord({ match, userId }) {
 
 	const [p1Name, setP1Name] = useState("Player 1");
 	const [p2Name, setP2Name] = useState("Player 2");
+	matchTime(match.date);
 	useEffect(() => {
 		const a = async () => {
 			try {
-				let p1Name = match.p1;
-				let p2Name = match.p2;
+				let _p1Name = match.p1;
+				let _p2Name = match.p2;
 				if (match.p1) {
 					const p1Data = await getUserData(match.p1);
-					console.log("p1 await");
-					p1Name = p1Data.name;
+					_p1Name = p1Data.name;
 				}
 				if (match.p2) {
 					const p2Data = await getUserData(match.p2);
-					console.log("p2 await");
-					p2Name = p2Data.name;
+					_p2Name = p2Data.name;
 				}
-				setP1Name(() => p1Name);
-				setP2Name(() => p2Name);
+				setP1Name(() => _p1Name);
+				setP2Name(() => _p2Name);
 			} catch (error) {
 				console.log("MatchRecord Error: ", error);
 				logout();
@@ -104,7 +66,6 @@ function MatchRecord({ match, userId }) {
 		}
 		a();
 	}, [match.p1, match.p2])
-
 	return (
 		<div
 			className={"my-1 py-1 text-light text-center container bg-dark border-start rounded" + (isUserWin ? " border-success" : " border-danger")}
@@ -131,12 +92,17 @@ function MatchRecord({ match, userId }) {
 						</div>
 					</div>
 					<div>
-						{match.date}
+						{matchTime(match.date)}
 					</div>
 				</div>
 			</div>
 		</div >
 	);
+}
+
+function matchTime(timestamp) {
+	const date = new Date(timestamp);
+	return (`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDay()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
 }
 
 function onClickNameInMatchRecord(event, userId) {

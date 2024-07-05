@@ -1,5 +1,5 @@
 import MyReact from "../MyReact/MyReact.js";
-import { Route } from "../MyReact/MyReactRouter.js";
+import { Route, navigate } from "../MyReact/MyReactRouter.js";
 import Home from "./home/Home.js";
 import UserPage from "./userPage/UserPage.js";
 import Login from "./LoginPage.js";
@@ -9,7 +9,12 @@ import LocalGame from "./LocalGame/Game.js";
 import RemoteGame from "./RemoteGame/Game.js";
 import Room from "./Room/Room.js";
 
+const paths = [ "/", "/emailotp", "/home", "/userpage", "/login", 
+                "/local_game", "/remote_game", "/next_game", "/room", ];
+
 function App() {
+    if (!paths.includes(window.location.pathname))
+        navigate("/home");
 	return (
 		<div>
 			<Route path="/" component={Interchange} />

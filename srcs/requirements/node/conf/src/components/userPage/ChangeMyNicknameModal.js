@@ -59,7 +59,8 @@ async function changeNickname(myId, newNickname) {
 			return Promise.reject("unknown");
 		}
 	} catch (error) {
-		return Promise.reject("network");
+		console.log("changeNickname Error: ", error);
+		return Promise.reject(error);
 	}
 }
 

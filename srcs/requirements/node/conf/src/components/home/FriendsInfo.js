@@ -20,19 +20,7 @@ const defaultFriendData = {
 	"online": true
 }
 
-function RefreshFriendsButton({ setRefresh }) {
-	function onClickrefreshFriends(event) {
-		event.preventDefault();
-		setRefresh(current => !current);
-	}
-	return (
-		<button type="button" className="btn btn-sm btn-primary me-2" onClick={onClickrefreshFriends}>
-			Refresh
-		</button>
-	);
-}
-
-function HomeFriends() {
+function FriendsInfo() {
 	const [friends, setFriends] = useState([]);
 	const [refresh, setRefresh] = useState(true);
 	useEffect(() => {
@@ -48,12 +36,12 @@ function HomeFriends() {
 		a();
 	}, [refresh])
 	return (
-		<div>
+		<div className="my-2">
 			<div className="fs-4 row">
 				<div className="container col-4">
 					Friends
 				</div>
-				<div className="container col-8 text-end pe-4 d-flex flex-row-reverse">
+				<div className="container col-8 text-end pe-4 d-flex flex-row-reverse align-items-center">
 					<AddNewFriendModal title="add Friend" setFriends={setFriends} />
 					<RefreshFriendsButton setRefresh={setRefresh} />
 				</div>
@@ -64,6 +52,20 @@ function HomeFriends() {
 				{friends.map(id => (
 					<FriendInfo friendId={id} setFriends={setFriends} refresh={refresh} />
 				))}
+			</div>
+		</div>
+	);
+}
+
+function RefreshFriendsButton({ setRefresh }) {
+	function onClickrefreshFriends(event) {
+		event.preventDefault();
+		setRefresh(current => !current);
+	}
+	return (
+		<div className="d-flex justify-content-center bg-primary rounded me-1" style="height:30px; width:30px; cursor: pointer;">
+			<div className="d-flex align-items-center">
+				<img src="https://10.15.6.2:4242/images/refresh.png" onClick={onClickrefreshFriends} style="height:25px; width:25px;" />
 			</div>
 		</div>
 	);
@@ -83,6 +85,7 @@ async function unFriend(friendId) {
 			return Promise.reject("unknown");
 		}
 	} catch (error) {
+		console.log("unFriend Error: ", error);
 		return Promise.reject(error);
 	}
 }
@@ -103,7 +106,6 @@ function onClickShowFriendsInfo(friendId) {
 	navigate(`/userpage?userId=${friendId}`);
 }
 
-//!!!??? 빨간점, 초록점 이미지
 function FriendInfo({ friendId, setFriends, refresh }) {
 	const [userData, setUserData] = useState(defaultFriendData);
 	const [userImage, setUserImage] = useState("https://www.studiopeople.kr/common/img/default_profile.png");
@@ -167,12 +169,11 @@ async function addNewFriend(newFriendName) {
 			return Promise.reject("unknown");
 		}
 	} catch (error) {
+		console.log("addNewFriend Error: ", error);
 		return Promise.reject(error);
 	}
 }
 
-//!!!??? 성공했을 때 친구 목록이 바로 업데이트되게끔 바꿔야함.
-//!!!??? 성공/실패 메세지 뜨고 잠시뒤에 or 창 닫으면 사라지게 하고싶음. settimeout 쓰면 1초에 한번씩 눌렀을 때 처음 누른 settimeout 때문에 3번째에 나온 메세지가 1초만에 사라짐.
 async function onClickAddNewFriendSubmit(event, setFriends) {
 	event.preventDefault();
 	const newFriendName = document.querySelector("#add-friend-input").value;
@@ -222,4 +223,4 @@ function AddNewFriendModal({ title, setFriends }) {
 	);
 }
 
-export default HomeFriends;
+export default FriendsInfo;

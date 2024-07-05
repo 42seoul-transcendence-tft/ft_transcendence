@@ -11,6 +11,7 @@ class BallSetter {
                 return ({
                     ...prev,
                     ball: {
+                        ...prev.ball,
                         x: ball.x + newDirection.x * ball.speed,
                         y: ball.y + newDirection.y * ball.speed,
                         direction: newDirection,

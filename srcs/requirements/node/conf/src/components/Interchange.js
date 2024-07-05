@@ -3,7 +3,7 @@ import { navigate } from "../MyReact/MyReactRouter.js";
 import getMyData from "./utility/getMyData.js";
 
 function Interchange() {
-	MyReact.useEffect(() => {
+	useEffect(() => {
 		const a = async () => {
 			try {
 				await getMyData();

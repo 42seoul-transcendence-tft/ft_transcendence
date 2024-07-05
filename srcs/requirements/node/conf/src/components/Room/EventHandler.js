@@ -1,10 +1,19 @@
 import { MyReact } from "../../MyReact/MyReact.js";
 import RoomStateSetter from "./StateSetter.js";
+import logout from "../utility/logout.js";
+import { SOCKET } from "../RemoteGame/constant.js";
 
 class RoomSocketEventHandler {
-    setRoomEvent(setPlayers) {
+    setRoomEvent(setPlayers, socket) {
         this.#roomEvent = async (newPlayers) => {
-            await RoomStateSetter.setPlayers(newPlayers, setPlayers);
+            try {
+                await RoomStateSetter.setPlayers(newPlayers, setPlayers);
+            }
+            catch (error) {
+                console.log("Room Error:", error);
+                socket.emit(SOCKET.EVENT.LEAVE_ROOM);
+                logout();
+            }
         };
     }
     get roomEvent() {

@@ -1,5 +1,6 @@
 import { MyReact } from "../../MyReact/MyReact.js";
-import Fetch from "./Fetch.js";
+import getUserData from "../utility/getUserData.js";
+import getUserProfileImage from "../utility/getUserProfileImage.js";
 
 class RoomStateSetter {
     static async setPlayers(newPlayers, playerSetter) {
@@ -11,12 +12,24 @@ class RoomStateSetter {
 }
 
 async function updatePlayers(newPlayers, playerSetter) {
-    const promises = newPlayers.map(newPlayer => Fetch.userData(newPlayer.pid));
-    const updatedPlayers = await Promise.all(promises);
-
-    playerSetter((prev) => {
-        return ({...prev, players: updatedPlayers});
-    });
+    const promises = newPlayers.reduce((promises, newPlayer) => {
+        if (newPlayer.pid) {
+            promises.push(getUserData(newPlayer.pid));
+            promises.push(getUserProfileImage(newPlayer.pid));
+        }
+        else 
+            promises.push(Promise.resolve(null));
+        return (promises);
+    }, []);;
+    const promiseResults = await Promise.all(promises);
+    const updatedPlayers = [];
+    for (let i = 0; i < promiseResults.length; i++) {
+        if (promiseResults[i]) 
+            updatedPlayers.push({ ...promiseResults[i], photoURL: promiseResults[++i] });
+        else
+            updatedPlayers.push({});
+    }
+    playerSetter((prev) => ({...prev, players: updatedPlayers}));
 } 
 
 function updateReadyStatus(newPlayers, playerSetter) {

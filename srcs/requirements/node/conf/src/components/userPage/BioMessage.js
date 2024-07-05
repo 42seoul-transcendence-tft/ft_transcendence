@@ -5,7 +5,6 @@ import tokenRefresh from "../utility/tokenRefresh.js";
 
 function BioMessage({ userId, isMyPage }) {
 	const [userData, setUserData] = useState("");
-	const [refresh, setRefresh] = useState(true);
 	const [isInputMode, setIsInputMode] = useState(false);
 
 	useEffect(() => {
@@ -18,25 +17,22 @@ function BioMessage({ userId, isMyPage }) {
 				logout();
 			}
 		}
-		if (userId > 0) {
-			a();
-		}
-	}, [userId, refresh]);
+		if (userId > 0) a();
+	}, [userId, isInputMode]);
 
 	async function onClickEditBio(event) {
 		event.preventDefault();
 		const newBioMessage = document.querySelector("#bio-input");
 		newBioMessage.value = userData.introduce;
-		setIsInputMode(current => !current);
+		setIsInputMode(() => true);
 	}
 
 	async function onClickSaveBio(event) {
 		event.preventDefault();
-		setIsInputMode(current => !current);
 		const newBioMessage = document.querySelector("#bio-input").value;
 		try {
 			await changeBioMessage(newBioMessage, userId);
-			setRefresh(current => !current);
+			setIsInputMode(() => false);
 		} catch (error) {
 			console.log("onClickSaveBio Error: ", error);
 			logout();
@@ -85,7 +81,7 @@ async function changeBioMessage(newBioMessage, myId) {
 		if (response.status === 200) {
 			return;
 		} else if (response.status === 401) {
-			return (tokenRefresh(() => changeBioMessage(newBioMessage, myId)));
+			return await tokenRefresh(() => changeBioMessage(newBioMessage, myId));
 		} else {
 			return Promise.reject("unknown");
 		}
