@@ -12,7 +12,6 @@ async function tokenRefresh(workingFunction) {
 			return Promise.reject("unknown");
 		}
 	} catch (error) {
-		console.log("tokenRefresh Error: ", error);
 		return Promise.reject(error);
 	}
 }

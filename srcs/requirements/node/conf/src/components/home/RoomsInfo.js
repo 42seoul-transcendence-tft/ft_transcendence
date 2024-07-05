@@ -2,7 +2,9 @@ import { useEffect, useState, MyReact } from "../../MyReact/MyReact.js";
 import { navigate } from "../../MyReact/MyReactRouter.js";
 import logout from "../utility/logout.js";
 import getRoomsData from "../utility/getRoomsData.js"
+import LoadingSpinning from "../utility/LoadingSpinning.js"
 import CreateRoomModal from "./CreateRoomModal.js"
+import "../../css/home/RotatingImage.css"
 
 function RoomsInfo({ myId }) {
 	const [rooms, setRooms] = useState([]);
@@ -19,7 +21,7 @@ function RoomsInfo({ myId }) {
 			}
 		};
 		a();
-	}, []);
+	}, [loading]);
 
 	return (
 		<div>
@@ -35,30 +37,24 @@ function RoomsInfo({ myId }) {
 					</div>
 				</div>
 				<div className="container col-6 text-end pe-4 d-flex flex-row-reverse align-items-center">
-					<CreateRoomModal myId={myId} />
-					<RefreshRoomButton setRooms={setRooms} />
+					<CreateRoomModal myId={myId} setLoading={setLoading} />
+					<RefreshRoomButton setLoading={setLoading} />
 				</div>
 			</div>
 			<div
 				className="container pt-2 pb-2 border-top border-bottom rounded bg-secondary bg-opacity-25"
 				style="height: 674px; overflow-y: auto;">
 				{loading ?
-					<div className="d-flex justify-content-center" style="height:100%">
-						<div className="d-flex align-items-center">
-							<div className="spinner-border text-primary"></div>
-						</div>
-					</div>
+					<LoadingSpinning />
 					:
 					<div>
 						{rooms
-							.filter(room => room.cur_users !== room.max_users && room.in_game === false)
-							.map((room) => (
-								<RoomInfo key={room.id} myId={myId} room={room} active={true} setRooms={setRooms} />
+							.filter(room => room.cur_users !== room.max_users && room.in_game === false).map((room) => (
+								<RoomInfo key={room.id} myId={myId} room={room} active={true} setLoading={setLoading} />
 							))}
 						{rooms
-							.filter(room => room.cur_users === room.max_users || room.in_game === true)
-							.map((room) => (
-								<RoomInfo key={room.id} myId={myId} room={room} active={false} setRooms={setRooms} />
+							.filter(room => room.cur_users === room.max_users || room.in_game === true).map((room) => (
+								<RoomInfo key={room.id} myId={myId} room={room} active={false} setLoading={setLoading} />
 							))}
 					</div>
 				}
@@ -67,21 +63,27 @@ function RoomsInfo({ myId }) {
 	);
 }
 
-function RefreshRoomButton({ setRooms }) {
+function RefreshRoomButton({ setLoading }) {
+	const [isRotated, setIsRotated] = useState(false);
 	async function onClickRefreshRoomButton(event) {
 		event.preventDefault();
-		try {
-			const _rooms = await getRoomsData();
-			setRooms(() => _rooms);
-		} catch (error) {
-			console.log("HomeMatches Error: ", error);
-			logout();
-		}
+		setLoading(() => true);
 	}
+	function handleMouseEnter() {
+		setIsRotated(() => true);
+	};
+
+	function handleMouseLeave() {
+		setIsRotated(() => false);
+	};
 	return (
-		<div className="d-flex justify-content-center bg-primary rounded me-1" style="height:30px; width:30px; cursor: pointer;">
+		<div className="d-flex justify-content-center bg-primary rounded me-1"
+			onClick={onClickRefreshRoomButton} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
+			style="height:30px; width:30px; cursor: pointer;">
 			<div className="d-flex align-items-center">
-				<img src="https://10.15.6.2:4242/images/refresh.png" onClick={onClickRefreshRoomButton} style="height:25px; width:25px;" />
+				<img src="https://10.15.6.2:4242/images/refresh.png"
+					className={`image ${isRotated ? 'rotate' : ''}`}
+					style="height:25px; width:25px;" />
 			</div>
 		</div>
 	);
@@ -102,26 +104,23 @@ function isStartedRoom(room) {
 	return false;
 }
 
-async function onClickEnterRoom(event, room, myId, setRooms) {
+async function onClickEnterRoom(event, roomId, myId, setLoading) {
 	event.preventDefault();
-	const roomId = room.id;
-	const title = room.name;
-	const roomType = room.mtt ? "mtt" : "pong";
 	try {
 		const currentRooms = await getRoomsData();
 		const currentRoom = currentRooms.find(room => room.id === roomId);
 		if (currentRoom === undefined) {
 			alert("This room disappeared");
-			setRooms(() => currentRooms);
+			setLoading(() => true);
 		} else if (isRoomFull(currentRoom)) {
 			alert("This room is full");
-			setRooms(() => currentRooms);
+			setLoading(() => true);
 		} else if (isAlreadyEnteredRoom(currentRoom, myId)) {
 			alert("you've already entered");
-			setRooms(() => currentRooms);
+			setLoading(() => true);
 		} else if (isStartedRoom(currentRoom)) {
 			alert("game has already started");
-			setRooms(() => currentRooms);
+			setLoading(() => true);
 		} else {
 			navigate("/room", { room: currentRoom, myId: myId });
 		}
@@ -131,7 +130,7 @@ async function onClickEnterRoom(event, room, myId, setRooms) {
 	}
 }
 
-function RoomInfo({ room, myId, active, setRooms }) {
+function RoomInfo({ room, myId, active, setLoading }) {
 	const opt1 = "container rounded text-center my-2 py-3 text-light border bg-primary";
 	const opt2 = "container rounded text-center my-2 py-3 text-light border bg-secondary";
 	const [mouseEntered, setMouseEntered] = useState(false);
@@ -160,7 +159,7 @@ function RoomInfo({ room, myId, active, setRooms }) {
 			<div className="my-2 py-4 fs-4 text-center bg-primary rounded border"
 				style="height: 82px; user-select: none; cursor: pointer;"
 				onMouseEnter={MouseEnter} onMouseLeave={MouseLeave}
-				onClick={event => onClickEnterRoom(event, room, myId, setRooms)}
+				onClick={event => onClickEnterRoom(event, room.id, myId, setLoading)}
 			>
 				<div>
 					Enter Room

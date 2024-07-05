@@ -7,10 +7,9 @@ async function getUserMatchRecords(userId) {
 			credentials: 'include'
 		});
 		if (response.status === 200) {
-			// console.log(await response.text());
 			return await response.json();
 		} else if (response.status === 401) {
-			return await tokenRefresh(() => getUserMatchRecords(userId));
+			return await tokenRefresh(async () => await getUserMatchRecords(userId));
 		} else {
 			return Promise.reject("unknown");
 		}

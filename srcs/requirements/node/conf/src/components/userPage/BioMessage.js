@@ -81,7 +81,7 @@ async function changeBioMessage(newBioMessage, myId) {
 		if (response.status === 200) {
 			return;
 		} else if (response.status === 401) {
-			return await tokenRefresh(() => changeBioMessage(newBioMessage, myId));
+			return await tokenRefresh(async () => await changeBioMessage(newBioMessage, myId));
 		} else {
 			return Promise.reject("unknown");
 		}

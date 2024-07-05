@@ -9,7 +9,7 @@ async function getUserData(userId) {
 		if (response.status === 200) {
 			return await response.json();
 		} else if (response.status === 401) {
-			return await tokenRefresh(() => getUserData(userId));
+			return await tokenRefresh(async () => await getUserData(userId));
 		} else if (response.status === 404) {
 			return Promise.reject("not found");
 		} else {

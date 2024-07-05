@@ -5,7 +5,7 @@ import closeModalById from "../utility/closeModalById.js";
 import notifyStatusById from "../utility/notifyStatusById.js"
 import logout from "../utility/logout.js";
 
-function CreateRoomModal({ myId }) {
+function CreateRoomModal({ myId, setLoading }) {
 	const [local, setLocal] = useState(false);
 	function onClickLocalOn() {
 		setLocal(() => true);
@@ -51,12 +51,12 @@ function CreateRoomModal({ myId }) {
 													<input id="create-room-input" className="me-1" type="text" placeholder="Room name" autocomplete="off" style="width:100%; height:38px;" />
 												</div>}
 											<div className="col-4">
-												<button className="btn btn-primary btn-md flex-fill" onClick={event => onCreateNewRoomSubmit(event, myId)}>Submit</button>
+												<button className="btn btn-primary btn-md flex-fill" onClick={event => onCreateNewRoomSubmit(event, myId, setLoading)}>Submit</button>
 											</div>
 										</div>
-										<div id="create-room-status" className="container mt-2 text-success flex-fill text-center"></div>
 									</form>
 								</div>
+								<div id="create-room-status" className="container mt-2 text-success flex-fill text-center"></div>
 							</div>
 						</div>
 
@@ -85,11 +85,11 @@ async function createRoom(title, roomType) {
 		} else if (response.status === 400) {//같은 이름의 방이 이미 있음
 			return Promise.reject("same room");
 		} else if (response.status === 401) {
-			return await tokenRefresh(() => createRoom(title, roomType));
+			return await tokenRefresh(async () => await createRoom(title, roomType));
 		} else if (response.status === 403) {
 			const data = await response.json();
 			if (data.detail === "Authentication credentials were not provided.") {
-				return await tokenRefresh(() => createRoom(title, roomType));
+				return await tokenRefresh(async () => await createRoom(title, roomType));
 			} else {
 				return Promise.reject("unknown");
 			}
@@ -102,7 +102,7 @@ async function createRoom(title, roomType) {
 	}
 }
 
-async function onCreateNewRoomSubmit(event, myId) {
+async function onCreateNewRoomSubmit(event, myId, setLoading) {
 	event.preventDefault();
 	const roomType = document.querySelector("input[name='optradio']:checked").value;
 	if (roomType === "local") {//로컬 방의 경우
@@ -121,6 +121,7 @@ async function onCreateNewRoomSubmit(event, myId) {
 			console.log("onCreateNewRoomSubmit Error: ", error);
 			if (error === "same room") {
 				notifyStatusById("Using Room name", false, "create-room-status");
+				setLoading(() => true);
 			} else {
 				closeModalById("create-room-modal");
 				logout();

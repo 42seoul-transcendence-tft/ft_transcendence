@@ -52,7 +52,7 @@ async function changeNickname(myId, newNickname) {
 		if (response.status === 200) {
 			return await response.json();
 		} else if (response.status === 401) {
-			return await tokenRefresh(() => changeNickname(myId, newNickname));
+			return await tokenRefresh(async () => await changeNickname(myId, newNickname));
 		} else if (response.status === 400) {
 			return Promise.reject("This nickname already exists");
 		} else {
