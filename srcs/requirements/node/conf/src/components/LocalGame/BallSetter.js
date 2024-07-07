@@ -20,7 +20,7 @@ class BallSetter {
                     },
                 });
             });
-        }, 60);
+        }, 30);
     }
     setBallStop() {
         clearInterval(this.#ballLoop);
