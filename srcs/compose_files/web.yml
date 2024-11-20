@@ -11,7 +11,7 @@ services:
   #   #   - 8080:8080
   #   networks:
   #     - my_net
-  #   build: 
+  #   build:
   #     context: ${PROJECT_DIR}/requirements/node/
   #     dockerfile: dockerfile
   #   healthcheck:
@@ -26,7 +26,7 @@ services:
     volumes:
       - node_volume:/workspace/public
     command: "npm run build"
-    build: 
+    build:
       context: ${PROJECT_DIR}/requirements/node/
       dockerfile: dockerfile
 
@@ -67,7 +67,11 @@ services:
       context: ${PROJECT_DIR}/requirements/user_server
       dockerfile: dockerfile
     healthcheck:
-      test: ["CMD-SHELL", "curl -sL localhost:8000/api/health/ | grep -q '{\"status\": \"OK\"}'"]
+      test:
+        [
+          "CMD-SHELL",
+          'curl -sL localhost:8000/api/health/ | grep -q ''{"status": "OK"}''',
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -82,7 +86,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_LISTEN_ADDRESSES: '*'
+      POSTGRES_LISTEN_ADDRESSES: "*"
       USERDATA_DB_NAME: ${USERDATA_DB_NAME}
       USERDATA_DB_USER: ${USERDATA_DB_USER}
       USERDATA_DB_PW: ${USERDATA_DB_PW}
@@ -131,7 +135,11 @@ services:
     networks:
       - my_net
     healthcheck:
-      test: ["CMD-SHELL", "curl -sL localhost:8001/api/health/ | grep -q '{\"status\": \"OK\"}'"]
+      test:
+        [
+          "CMD-SHELL",
+          'curl -sL localhost:8001/api/health/ | grep -q ''{"status": "OK"}''',
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -149,7 +157,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_LISTEN_ADDRESSES: '*'
+      POSTGRES_LISTEN_ADDRESSES: "*"
       GAMEDATA_DB_NAME: ${GAMEDATA_DB_NAME}
       GAMEDATA_DB_USER: ${USERDATA_DB_USER}
       GAMEDATA_DB_PW: ${USERDATA_DB_PW}
@@ -207,7 +215,11 @@ services:
     networks:
       - my_net
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:8080 -I | grep -q 'HTTP/1.1 200 OK'"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:8080 -I | grep -q 'HTTP/1.1 200 OK'",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
