@@ -3,7 +3,7 @@ services:
     image: elasticsearch:${STACK_VERSION}
     container_name: cert_setup
     networks:
-      - elk_net
+      - my_net
     volumes:
       - ${PROJECT_DIR}/requirements/elasticsearch/cert_setup.sh:/usr/share/elasticsearch/cert_setup.sh
       - certs_volume:/usr/share/elasticsearch/config/certs
@@ -12,17 +12,18 @@ services:
 
   elk_setup:
     depends_on:
-      cert_setup:
+      vault_init:
         condition: service_completed_successfully
       es01:
         condition: service_healthy
     image: elasticsearch:${STACK_VERSION}
     container_name: elk_setup
     networks:
-      - elk_net
+      - my_net
     volumes:
-      - ${PROJECT_DIR}/requirements/elasticsearch/elk_setup.sh:/usr/share/elasticsearch/elk_setup.sh
+      - ${PROJECT_DIR}/requirements/elasticsearch/elk_setup.sh:/usr/share/elasticsearch/elk_setup.sh:ro
       - certs_volume:/usr/share/elasticsearch/config/certs
+      - ${PROJECT_DIR}/requirements/elasticsearch/settings:/usr/share/elasticsearch/settings:ro
     environment:
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       KIBANA_PASSWORD: ${KIBANA_PASSWORD}
@@ -32,7 +33,7 @@ services:
 
   es01:
     depends_on:
-      cert_setup:
+      vault_init:
         condition: service_completed_successfully
     image: elasticsearch:${STACK_VERSION}
     container_name: es01
@@ -40,7 +41,7 @@ services:
       - certs_volume:/usr/share/elasticsearch/config/certs
       - es01_volume:/usr/share/elasticsearch/data
     networks:
-      - elk_net
+      - my_net
     environment:
       node.name: es01
       cluster.name: ${CLUSTER_NAME}
@@ -83,7 +84,7 @@ services:
       - certs_volume:/usr/share/elasticsearch/config/certs
       - es02_volume:/usr/share/elasticsearch/data
     networks:
-      - elk_net
+      - my_net
     environment:
       node.name: es02
       cluster.name: ${CLUSTER_NAME}
@@ -130,7 +131,7 @@ services:
     ports:
       - 5601:5601
     networks:
-      - elk_net
+      - my_net
     environment:
       SERVERNAME: kibana
       ELASTICSEARCH_HOSTS: https://es01:9200
@@ -180,34 +181,12 @@ services:
       xpack.monitoring.elasticsearch.ssl.verification_mode: full
     mem_limit: ${MEM_LIMIT}
     networks:
-      - elk_net
+      - my_net
     healthcheck:
       test: ["CMD-SHELL", "curl -XGET 'localhost:9600/?pretty' | grep -q '\"status\" : \"green\"'"]
       interval: 30s
       timeout: 3s
       retries: 5
-
-  filebeat:
-    depends_on:
-      nginx:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-      logstash:
-        condition: service_healthy
-    image: elastic/filebeat:${STACK_VERSION}
-    container_name: filebeat
-    volumes:
-      - certs_volume:/usr/share/filebeat/config/certs
-      - logs_volume:/logs
-      - ${PROJECT_DIR}/requirements/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-    networks:
-      - elk_net
-
-networks:
-  elk_net:
-    name: elk_net
-    driver: bridge
 
 volumes:
   certs_volume:

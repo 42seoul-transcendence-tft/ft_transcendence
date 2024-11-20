@@ -1,24 +1,24 @@
 services:
-  node:
-    image: node:transcendence
-    pull_policy: never
-    container_name: node
-    volumes:
-      - ${PROJECT_DIR}/requirements/node/conf/src:/workspace/src
-      - logs_volume:/logs
-    restart: always
-    ports:
-      - 8080:8080
-    networks:
-      - my_net
-    build: 
-      context: ${PROJECT_DIR}/requirements/node/
-      dockerfile: dockerfile
-    healthcheck:
-      test: ["CMD-SHELL", "curl -I localhost:8080 | grep -q 'HTTP/1.1 200 OK'"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
+  # node:
+  #   image: node:transcendence
+  #   pull_policy: never
+  #   container_name: node
+  #   volumes:
+  #     - ${PROJECT_DIR}/requirements/node/conf/src:/workspace/src
+  #     - logs_volume:/logs
+  #   restart: always
+  #   # ports:
+  #   #   - 8080:8080
+  #   networks:
+  #     - my_net
+  #   build:
+  #     context: ${PROJECT_DIR}/requirements/node/
+  #     dockerfile: dockerfile
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -I localhost:8080 | grep -q 'HTTP/1.1 200 OK'"]
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 5
 
   node_builder:
     image: node:transcendence
@@ -26,7 +26,7 @@ services:
     volumes:
       - node_volume:/workspace/public
     command: "npm run build"
-    build: 
+    build:
       context: ${PROJECT_DIR}/requirements/node/
       dockerfile: dockerfile
 
@@ -34,13 +34,19 @@ services:
     depends_on:
       userdb:
         condition: service_healthy
-      # vault_init:
-      #   condition: service_completed_successfully
+      vault_init:
+        condition: service_completed_successfully
+      vault:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
     pull_policy: never
     image: python:userserver
     container_name: userserver
     volumes:
       - ${PROJECT_DIR}/requirements/user_server/${DJANGO_PROJECT_NAME}:/app/${DJANGO_PROJECT_NAME}
+      - certs_volume:/certs
+      - django_log_volume:/logs
       - avatars_volume:/app/${DJANGO_PROJECT_NAME}/avatars
     environment:
       USERDATA_DB_NAME: ${USERDATA_DB_NAME}
@@ -50,6 +56,8 @@ services:
       CLIENT_SECRET: ${CLIENT_SECRET}
       # CLIENT_ID: ${LOCALHOST_CLIENT_ID}
       # CLIENT_SECRET: ${LOCALHOST_SECRET}
+      VAULT_USER_NAME: ${VAULT_USER_NAME}
+      VAULT_PASSWORD: ${VAULT_PASSWORD}
       HOST_IP: ${HOST_IP}
     # ports:
     #   - 8000:8000
@@ -59,11 +67,15 @@ services:
       context: ${PROJECT_DIR}/requirements/user_server
       dockerfile: dockerfile
     healthcheck:
-      test: ["CMD-SHELL", "curl -I localhost:8000 | grep -q 'HTTP/1.1 404 Not Found'"]
-      interval: 5s
-      timeout: 1s
+      test:
+        [
+          "CMD-SHELL",
+          'curl -sL localhost:8000/api/health/ | grep -q ''{"status": "OK"}''',
+        ]
+      interval: 30s
+      timeout: 5s
       retries: 3
-      start_period: 1s
+      start_period: 10s
 
   userdb:
     image: postgres:userserver
@@ -74,7 +86,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_LISTEN_ADDRESSES: '*'
+      POSTGRES_LISTEN_ADDRESSES: "*"
       USERDATA_DB_NAME: ${USERDATA_DB_NAME}
       USERDATA_DB_USER: ${USERDATA_DB_USER}
       USERDATA_DB_PW: ${USERDATA_DB_PW}
@@ -85,10 +97,10 @@ services:
       dockerfile: dockerfile
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
-      interval: 1s
+      interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 1s
+      start_period: 10s
 
   gameserver:
     image: python:gameserver
@@ -98,26 +110,40 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      vault_init:
+        condition: service_completed_successfully
+      vault:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
     build:
       context: ${PROJECT_DIR}/requirements/game_server
       dockerfile: dockerfile
     container_name: gameserver
     volumes:
       - ${PROJECT_DIR}/requirements/game_server/${DJANGO_PROJECT_NAME}:/app/${DJANGO_PROJECT_NAME}
+      - certs_volume:/certs
+      - django_log_volume:/logs
     # ports:
     #   - 8001:8001
     environment:
       GAMEDATA_DB_NAME: ${GAMEDATA_DB_NAME}
       GAMEDATA_DB_USER: ${USERDATA_DB_USER}
       GAMEDATA_DB_PW: ${USERDATA_DB_PW}
+      VAULT_USER_NAME: ${VAULT_USER_NAME}
+      VAULT_PASSWORD: ${VAULT_PASSWORD}
     networks:
       - my_net
     healthcheck:
-      test: ["CMD-SHELL", "curl -s localhost:8001"]
-      interval: 5s
+      test:
+        [
+          "CMD-SHELL",
+          'curl -sL localhost:8001/api/health/ | grep -q ''{"status": "OK"}''',
+        ]
+      interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 1s
+      start_period: 10s
 
   gamedb:
     image: postgres:gameserver
@@ -131,7 +157,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_LISTEN_ADDRESSES: '*'
+      POSTGRES_LISTEN_ADDRESSES: "*"
       GAMEDATA_DB_NAME: ${GAMEDATA_DB_NAME}
       GAMEDATA_DB_USER: ${USERDATA_DB_USER}
       GAMEDATA_DB_PW: ${USERDATA_DB_PW}
@@ -139,7 +165,7 @@ services:
       - my_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -p 5431 -U $POSTGRES_USER"]
-      interval: 5s
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
@@ -155,14 +181,14 @@ services:
       - my_net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
 
   nginx:
     depends_on:
-      cert_setup:
+      vault_init:
         condition: service_completed_successfully
       node_builder:
         condition: service_completed_successfully
@@ -184,15 +210,16 @@ services:
       - node_volume:/node/:ro
       - ${PROJECT_DIR}/requirements/node/conf/src/css/images:/images:ro
     ports:
-      - 8000:8000
-      - 8001:8001
       - 9090:9090
       - 4242:4242
-      # - 8080:8080
     networks:
       - my_net
     healthcheck:
-      test: ["CMD-SHELL", "curl -k -I -s https://localhost:443 | grep -q 'Server: nginx'"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:8080 -I | grep -q 'HTTP/1.1 200 OK'",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -204,6 +231,9 @@ volumes:
     driver: local
   gamedb_volume:
     name: gamedb_volume
+    driver: local
+  django_log_volume:
+    name: django_log_volume
     driver: local
   avatars_volume:
     name: avatars_volume

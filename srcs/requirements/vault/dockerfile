@@ -1,5 +1,5 @@
 FROM vault:1.13.3
-RUN apk add --no-cache curl jq
+RUN apk add --no-cache curl jq openssl
 RUN mkdir -p /vault/file /vault/config \
     && chown vault:vault /vault/file /vault/config
 CMD [ "server" ]

@@ -1,7 +1,7 @@
 services:
   grafana:
     depends_on:
-      cert_setup:
+      vault_init:
         condition: service_completed_successfully
       prometheus:
         condition: service_healthy
@@ -40,8 +40,6 @@ services:
       - ${PROJECT_DIR}/requirements/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
       - prometheus_volume:/prometheus
       - certs_volume:/certs
-    # ports:
-    #   - 9090:9090
     networks:
       - my_net
     healthcheck:
@@ -87,8 +85,8 @@ services:
       ALERTMANAGER_EMAIL_FROM: ${ALERTMANAGER_EMAIL_FROM}
       ALERTMANAGER_AUTH_USERNAME: ${ALERTMANAGER_AUTH_USERNAME}
       ALERTMANAGER_AUTH_PASSWORD: ${ALERTMANAGER_AUTH_PASSWORD}
-    ports:
-      - 9093:9093
+    # ports:
+    #   - 9093:9093
     networks:
       - my_net
     healthcheck:
@@ -97,6 +95,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
   nginx_exporter:
     depends_on:
       nginx:

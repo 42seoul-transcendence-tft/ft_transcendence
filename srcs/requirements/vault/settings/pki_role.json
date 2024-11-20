@@ -1,0 +1,8 @@
+{
+    "name": "test",
+    "key_type": "rsa",
+    "ttl": "8760h",
+    "max_ttl": "8760h",
+    "allow_localhost": true,
+    "allow_any_name": true
+}

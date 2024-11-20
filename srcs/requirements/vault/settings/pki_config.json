@@ -1,0 +1,5 @@
+{
+    "issuing_certificates": ["https//vault:8200/v1/pki/ca"],
+    "crl_distribution_points": ["https://vault:8200/v1/pki/crl"],
+    "ocsp_servers": ["https://vault:8200/v1/pki/ocsp"]
+}

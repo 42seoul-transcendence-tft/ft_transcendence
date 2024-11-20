@@ -3,6 +3,11 @@ SCRIPTS_PATH := ./srcs/scripts
 
 .PHONY: all
 all:
+	sh set_ip.sh
+	docker compose -f $(YML_PATH) up --build -d
+
+.PHONY: only_compose
+only_compose:
 	docker compose -f $(YML_PATH) up --build -d
 
 .PHONY: up

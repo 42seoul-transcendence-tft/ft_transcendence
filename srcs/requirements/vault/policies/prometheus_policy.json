@@ -1,0 +1,4 @@
+{
+    "policy": "path \"/sys/metrics\" {\n capabilities = [\"read\"]\n}"
+}
+  

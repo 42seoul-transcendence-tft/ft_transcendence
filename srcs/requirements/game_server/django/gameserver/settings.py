@@ -14,6 +14,23 @@ from pathlib import Path
 from datetime import timedelta
 import os
 
+import hvac
+def kv_get(key):
+    client = hvac.Client(
+        url="https://vault:8200",
+        verify="/certs/ca/ca.crt",
+    )
+    client.auth.userpass.login(
+        username=os.getenv('VAULT_USER_NAME'),
+        password=os.getenv('VAULT_PASSWORD')
+    )
+    secret = client.secrets.kv.v2.read_secret_version(path='django-secret', mount_point='kv')
+    ret = secret['data']['data'].get(key)
+    if ret:
+        return ret
+    else:
+        raise ValueError(f"Key '{key}' not found in the secret data.")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,10 +39,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$ywy1)s6lw4y40okbju%g(4t542x^k6=9#env-pgyjtx+ukx+0'
+SECRET_KEY = kv_get('GAME_SERVER_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -78,6 +95,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'gameserver.middleware.RequestLoggingMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -180,4 +198,82 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ASGI_APPLICATION = 'gameserver.asgi.application'
 
+LOG_PATH='/logs/game_server'
+os.makedirs(f'{LOG_PATH}', exist_ok=True)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[{server_time}] {message}',
+            'style': '{',
+        },
+        'logstash': {
+            '()': 'logstash_async.formatter.DjangoLogstashFormatter',
+            'message_type': 'python-logstash',
+            'fqdn': False, # Fully qualified domain name. Default value: false.
+            'extra': {
+                'application': "game_server",
+                'environment': 'production'
+            }
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/hello.log',
+        },
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+        'logstash': {
+            'level': 'DEBUG',
+            'class': 'logstash_async.handler.AsynchronousLogstashHandler',
+            'formatter': 'logstash',
+            'transport': 'logstash_async.transport.TcpTransport',
+            'host': 'logstash',
+            'port': 5959,
+            'ssl_enable': True,
+            'ssl_verify': True,
+            'ca_certs': '/certs/ca/ca.crt',
+            'certfile': '/certs/gameserver/gameserver.crt',
+            'keyfile': '/certs/gameserver/gameserver.key',
+            'database_path': '{}/logstash.db'.format(LOG_PATH),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['logstash'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 APPEND_SLASH = False

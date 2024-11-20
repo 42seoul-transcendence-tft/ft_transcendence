@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.urls import path, include
 from .views import RoomViewset
+from . import views
 from rest_framework.routers import DefaultRouter
 
 RoomRouter = DefaultRouter()
@@ -23,4 +24,5 @@ RoomRouter.register(r'rooms', RoomViewset, basename='rooms')
 
 urlpatterns = [
 	path('', include(RoomRouter.urls)),
+    path('health/', views.health_check),
 ]

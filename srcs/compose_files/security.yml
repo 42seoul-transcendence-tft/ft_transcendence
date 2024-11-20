@@ -46,6 +46,7 @@ services:
       - ${PROJECT_DIR}/requirements/vault/policies:/vault/policies/:ro
       - ${PROJECT_DIR}/requirements/vault/vault_init.sh:/vault_init.sh:ro
       - ${PROJECT_DIR}/requirements/vault/config:/vault/config:ro
+      - ${PROJECT_DIR}/requirements/vault/settings:/vault/settings:ro
       - valut_keys_volume:/vault/keys
       - vault_volume:/vault/file/
       - certs_volume:/certs/

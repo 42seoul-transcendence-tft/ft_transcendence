@@ -1,0 +1,9 @@
+server {
+    listen       8484;
+    server_name  localhost;
+
+    location /metrics {
+        stub_status on;
+        allow all;
+    }
+}

@@ -9,48 +9,6 @@ if [ ! -f config/certs/certs.zip ]; then
     echo "Creating certs";
     echo -ne \
         "instances:\n"\
-        "   - name: es01\n"\
-        "     dns:\n"\
-        "       - es01\n"\
-        "       - localhost\n"\
-        "     ip:\n"\
-        "       - 127.0.0.1\n"\
-        "   - name: es02\n"\
-        "     dns:\n"\
-        "       - es02\n"\
-        "       - localhost\n"\
-        "     ip:\n"\
-        "       - 127.0.0.1\n"\
-        "   - name: logstash\n"\
-        "     dns:\n"\
-        "       - logstash\n"\
-        "       - localhost\n"\
-        "     ip:\n"\
-        "       - 127.0.0.1\n"\
-        "   - name: kibana\n"\
-        "     dns:\n"\
-        "       - kibana\n"\
-        "       - localhost\n"\
-        "     ip:\n"\
-        "       - 127.0.0.1\n"\
-        "   - name: filebeat\n"\
-        "     dns:\n"\
-        "       - filebeat\n"\
-        "       - localhost\n"\
-        "     ip:\n"\
-        "       - 127.0.0.1\n"\
-        "   - name: nginx\n"\
-        "     dns:\n"\
-        "       - nginx\n"\
-        "       - localhost\n"\
-        "     ip:\n"\
-        "       - 127.0.0.1\n"\
-        "   - name: grafana\n"\
-        "     dns:\n"\
-        "       - grafana\n"\
-        "       - localhost\n"\
-        "     ip:\n"\
-        "       - 127.0.0.1\n"\
         "   - name: vault\n"\
         "     dns:\n"\
         "       - vault\n"\

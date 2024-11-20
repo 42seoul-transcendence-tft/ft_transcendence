@@ -19,11 +19,11 @@ import hvac
 def kv_get(key):
     client = hvac.Client(
         url="https://vault:8200",
-        verify=False,
+        verify="/certs/ca/ca.crt",
     )
     client.auth.userpass.login(
-        username='server',
-        password='qlalfqjsgh'
+        username=os.getenv('VAULT_USER_NAME'),
+        password=os.getenv('VAULT_PASSWORD')
     )
     secret = client.secrets.kv.v2.read_secret_version(path='django-secret', mount_point='kv')
     ret = secret['data']['data'].get(key)
@@ -42,11 +42,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = kv_get('DJANGO_SECRET_KEY')
-SECRET_KEY = 'django-insecure-lo0q8rwc4qvn*9t933jr+j2#0pn93h3i$km-)sx)5q5av9@l-^'
+SECRET_KEY = kv_get('USER_SERVER_SECRET_KEY')
+# SECRET_KEY = 'django-insecure-lo0q8rwc4qvn*9t933jr+j2#0pn93h3i$km-)sx)5q5av9@l-^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -94,7 +94,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -102,6 +101,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'user_manage.middleware.RequestLoggingMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -212,7 +212,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'SIGNING_KEY': 'hihi',
+    'SIGNING_KEY': kv_get('JWT_SECRET'),
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ALGORITHM': 'HS256',
@@ -238,3 +238,76 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'tkdwjd4512@gmail.com'
 EMAIL_HOST_PASSWORD = 'mqju xkdl ydpy jcyq'
+
+LOG_PATH='/logs/user_server'
+os.makedirs(f'{LOG_PATH}', exist_ok=True)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[{server_time}] {message}',
+            'style': '{',
+        },
+        'logstash': {
+            '()': 'logstash_async.formatter.DjangoLogstashFormatter',
+            'message_type': 'python-logstash',
+            'fqdn': False, # Fully qualified domain name. Default value: false.
+            'extra': {
+                'application': "user_server",
+                'environment': 'production'
+            }
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+        'logstash': {
+            'level': 'DEBUG',
+            'class': 'logstash_async.handler.AsynchronousLogstashHandler',
+            'formatter': 'logstash',
+            'transport': 'logstash_async.transport.TcpTransport',
+            'host': 'logstash',
+            'port': 5959,
+            'ssl_enable': True,
+            'ssl_verify': True,
+            'ca_certs': '/certs/ca/ca.crt',
+            'certfile': '/certs/userserver/userserver.crt',
+            'keyfile': '/certs/userserver/userserver.key',
+            'database_path': '{}/logstash.db'.format(LOG_PATH),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['logstash'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

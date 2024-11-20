@@ -1,0 +1,4 @@
+{
+    "policies": ["prometheus"],
+    "ttl": "8760h"
+}
